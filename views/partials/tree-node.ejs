@@ -1,0 +1,59 @@
+<% if (node) { %>
+    <div class="tree-node" data-level="<%= level %>">
+        <!-- Node item -->
+        <div class="tree-item d-flex align-items-center py-2 px-2 rounded" 
+             data-type="<%= node.type %>" 
+             data-size="<%= node.size || 0 %>">
+            
+            <% if (node.type === 'directory') { %>
+                <!-- Directory -->
+                <% if (node.children && node.children.length > 0) { %>
+                    <i class="bi bi-chevron-right expand-icon me-2" style="font-size: 0.8rem;"></i>
+                <% } else { %>
+                    <span class="me-2" style="width: 0.8rem;"></span>
+                <% } %>
+                
+                <i class="bi bi-folder-fill folder-icon me-2"></i>
+                <span class="fw-medium"><%= node.name %></span>
+                
+                <% if (node.children && node.children.length > 0) { %>
+                    <span class="badge bg-secondary ms-2"><%= node.children.length %></span>
+                <% } %>
+                
+            <% } else { %>
+                <!-- File -->
+                <span class="me-2" style="width: 0.8rem;"></span>
+                <i class="bi bi-file-earmark file-icon me-2"></i>
+                <span><%= node.name %></span>
+                
+                <% if (node.size) { %>
+                    <span class="file-size ms-auto">
+                        <%= formatFileSize(node.size) %>
+                    </span>
+                <% } %>
+            <% } %>
+        </div>
+        
+        <!-- Children (for directories) -->
+        <% if (node.type === 'directory' && node.children && node.children.length > 0) { %>
+            <div class="tree-children" style="display: none;">
+                <% node.children.forEach(function(child) { %>
+                    <%- include('../partials/tree-node', { node: child, level: level + 1 }) %>
+                <% }); %>
+            </div>
+        <% } %>
+    </div>
+<% } %>
+
+<%
+// Helper function để format file size
+function formatFileSize(bytes) {
+    if (!bytes || bytes === 0) return '0 B';
+    
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+%>
