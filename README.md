@@ -1,13 +1,13 @@
-# Ứng dụng Quản lý Thư mục
+# Ứng dụng Quản lý Bệnh án
 
-Ứng dụng web đơn giản để quản lý và hiển thị cấu trúc thư mục `/Users/DangLong/apps/mfiles/list-f` sử dụng Node.js + Express + EJS.
+Ứng dụng web đơn giản để quản lý và hiển thị cấu trúc bệnh án `/Users/DangLong/apps/mfiles/list-f` sử dụng Node.js + Express + EJS.
 
 ## Tính năng
 
-- 📁 Hiển thị cấu trúc thư mục dưới dạng tree view
+- 📁 Hiển thị cấu trúc bệnh án dưới dạng tree view
 - 🔍 Scan và hiển thị tất cả file và folder
-- 📊 Thống kê số lượng thư mục, file và tổng dung lượng
-- 🎯 Tương tác expand/collapse thư mục với animation mượt
+- 📊 Thống kê số lượng bệnh án, file và tổng dung lượng
+- 🎯 Tương tác expand/collapse bệnh án với animation mượt
 - ⌨️ Hỗ trợ phím tắt
 - 📱 Giao diện responsive với Bootstrap 5
 
@@ -48,14 +48,14 @@
 
 ## Phím tắt
 
-- `Ctrl + E` (hoặc `Cmd + E` trên Mac): Mở rộng tất cả thư mục
-- `Ctrl + C` (hoặc `Cmd + C` trên Mac): Thu gọn tất cả thư mục  
+- `Ctrl + E` (hoặc `Cmd + E` trên Mac): Mở rộng tất cả bệnh án
+- `Ctrl + C` (hoặc `Cmd + C` trên Mac): Thu gọn tất cả bệnh án  
 - `Ctrl + R` (hoặc `Cmd + R` trên Mac): Làm mới trang
 
 ## API Endpoints
 
 - `GET /` - Trang chính hiển thị tree view
-- `GET /api/directory` - API trả về cấu trúc thư mục dưới dạng JSON
+- `GET /api/directory` - API trả về cấu trúc bệnh án dưới dạng JSON
 
 ## Công nghệ sử dụng
 
@@ -75,9 +75,9 @@
 
 ## Lưu ý
 
-- Ứng dụng được cấu hình để scan thư mục `/Users/DangLong/apps/mfiles/list-f`
+- Ứng dụng được cấu hình để scan bệnh án `/Users/DangLong/apps/mfiles/list-f`
 - Có giới hạn độ sâu scan (10 levels) để tránh infinite loop
-- Hỗ trợ sắp xếp: thư mục trước, file sau, theo alphabet
+- Hỗ trợ sắp xếp: bệnh án trước, file sau, theo alphabet
 
 ## Development
 

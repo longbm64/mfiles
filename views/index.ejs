@@ -37,7 +37,7 @@
                     <div class="card-header bg-primary text-white">
                         <h5 class="mb-0">
                             <i class="bi bi-search"></i>
-                            Tìm kiếm thư mục
+                            Tìm kiếm bệnh án
                         </h5>
                     </div>
                     <div class="card-body">
@@ -47,7 +47,7 @@
                                        class="form-control form-control-lg" 
                                        name="folder" 
                                        value="<%= folderName %>" 
-                                       placeholder="Nhập tên thư mục cần tìm (ví dụ: 100, 101, 01...)" 
+                                       placeholder="Nhập tên bệnh án cần tìm (ví dụ: 100, 101, 01...)" 
                                        required>
                             </div>
                             <button type="submit" class="btn btn-primary btn-lg">
@@ -76,7 +76,7 @@
                     <div class="card-header bg-primary text-white">
                         <h5 class="mb-0">
                             <i class="bi bi-diagram-3"></i>
-                            Cấu trúc thư mục
+                            Cấu trúc bệnh án
                         </h5>
                     </div>
                     <div class="card-body">
@@ -90,7 +90,7 @@
                             <!-- Search result info -->
                             <div class="alert alert-info mb-3" role="alert">
                                 <i class="bi bi-info-circle"></i>
-                                Hiển thị nội dung của thư mục: <strong><%= folderName %></strong>
+                                Hiển thị nội dung của bệnh án: <strong><%= folderName %></strong>
                             </div>
                             <!-- Directory tree -->
                             <div id="directory-tree">
@@ -105,7 +105,7 @@
                                             <i class="bi bi-folder fs-4 text-warning me-2"></i>
                                             <div>
                                                 <div class="fw-bold" id="folder-count">0</div>
-                                                <small class="text-muted">Thư mục</small>
+                                                <small class="text-muted">Bệnh án</small>
                                             </div>
                                         </div>
                                     </div>
@@ -133,10 +133,10 @@
                             <!-- Welcome message -->
                             <div class="text-center py-5">
                                 <i class="bi bi-search fs-1 text-muted"></i>
-                                <h4 class="text-muted mt-3">Chào mừng đến với Quản lý thư mục</h4>
-                                <p class="text-muted">Vui lòng nhập tên thư mục ở form trên để xem nội dung</p>
+                                <h4 class="text-muted mt-3">Chào mừng đến với Quản lý bệnh án</h4>
+                                <p class="text-muted">Vui lòng nhập tên bệnh án ở form trên để xem nội dung</p>
                                 <div class="mt-4">
-                                    <h6 class="text-muted">Các thư mục có sẵn:</h6>
+                                    <h6 class="text-muted">Các bệnh án có sẵn:</h6>
                                     <div class="d-flex justify-content-center gap-2 flex-wrap">
                                         <span class="badge bg-secondary">100</span>
                                         <span class="badge bg-secondary">101</span>
@@ -148,7 +148,7 @@
                             <!-- No results -->
                             <div class="text-center py-5">
                                 <i class="bi bi-folder-x fs-1 text-muted"></i>
-                                <p class="text-muted mt-3">Không tìm thấy thư mục "<%= folderName %>"</p>
+                                <p class="text-muted mt-3">Không tìm thấy bệnh án "<%= folderName %>"</p>
                             </div>
                         <% } %>
                     </div>

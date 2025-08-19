@@ -1,7 +1,7 @@
 {
   "name": "folder-manager",
   "version": "1.0.0",
-  "description": "Ứng dụng quản lý và hiển thị cấu trúc thư mục",
+  "description": "Ứng dụng quản lý và hiển thị cấu trúc bệnh án",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

@@ -15,7 +15,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Route để phục vụ file PDF
 app.get('/file/*', (req, res) => {
     const relativePath = req.params[0]; // Lấy đường dẫn tương đối từ URL
-    const baseDir = '/Users/DangLong/apps/mfiles/list-f';
+    const baseDir = '/./list-f';
     const fullPath = path.join(baseDir, relativePath);
     
     try {
@@ -24,7 +24,7 @@ app.get('/file/*', (req, res) => {
             return res.status(404).send('File không tồn tại');
         }
         
-        // Kiểm tra có phải file không (không phải thư mục)
+        // Kiểm tra có phải file không (không phải bệnh án)
         const stats = fs.statSync(fullPath);
         if (!stats.isFile()) {
             return res.status(400).send('Đường dẫn không phải là file');
@@ -50,11 +50,11 @@ app.get('/file/*', (req, res) => {
 });
 
 /**
- * Hàm đệ quy để scan cấu trúc thư mục
- * @param {string} dirPath - Đường dẫn thư mục cần scan
+ * Hàm đệ quy để scan cấu trúc bệnh án
+ * @param {string} dirPath - Đường dẫn bệnh án cần scan
  * @param {number} depth - Độ sâu hiện tại (để tránh scan quá sâu)
- * @param {string} baseDir - Thư mục gốc để tính relative path
- * @returns {Object} Cấu trúc thư mục dưới dạng object
+ * @param {string} baseDir - Bệnh án gốc để tính relative path
+ * @returns {Object} Cấu trúc bệnh án dưới dạng object
  */
 function scanDirectory(dirPath, depth = 0, baseDir = null) {
     const maxDepth = 10; // Giới hạn độ sâu để tránh infinite loop
@@ -65,7 +65,7 @@ function scanDirectory(dirPath, depth = 0, baseDir = null) {
     
     // Nếu baseDir chưa được set, sử dụng dirPath làm baseDir
     if (!baseDir) {
-        baseDir = '/Users/DangLong/apps/mfiles/list-f';
+        baseDir = '/./list-f';
     }
     
     try {
@@ -76,7 +76,7 @@ function scanDirectory(dirPath, depth = 0, baseDir = null) {
             const children = [];
             const items = fs.readdirSync(dirPath);
             
-            // Sắp xếp: thư mục trước, file sau
+            // Sắp xếp: bệnh án trước, file sau
             items.sort((a, b) => {
                 const aPath = path.join(dirPath, a);
                 const bPath = path.join(dirPath, b);
@@ -122,7 +122,7 @@ function scanDirectory(dirPath, depth = 0, baseDir = null) {
 
 // Route chính để hiển thị form tìm kiếm và kết quả
 app.get('/', (req, res) => {
-    const baseDir = '/Users/DangLong/apps/mfiles/list-f';
+    const baseDir = '/./list-f';
     const folderName = req.query.folder ? req.query.folder.trim() : '';
     
     let directoryStructure = null;
@@ -131,7 +131,7 @@ app.get('/', (req, res) => {
     
     // Validation input
     if (folderName && (folderName.length > 50 || /[<>:"/\\|?*]/.test(folderName))) {
-        error = 'Tên thư mục không hợp lệ. Vui lòng không sử dụng ký tự đặc biệt và giới hạn dưới 50 ký tự.';
+        error = 'Tên bệnh án không hợp lệ. Vui lòng không sử dụng ký tự đặc biệt và giới hạn dưới 50 ký tự.';
     }
     
     // Nếu có tham số folder, tìm kiếm folder đó
@@ -142,23 +142,23 @@ app.get('/', (req, res) => {
             if (searchPath) {
                 directoryStructure = scanDirectory(searchPath);
                 
-                // Kiểm tra nếu thư mục rỗng
+                // Kiểm tra nếu bệnh án rỗng
                 if (!directoryStructure.children || directoryStructure.children.length === 0) {
-                    error = `Thư mục "${folderName}" tồn tại nhưng không có nội dung hoặc bạn không có quyền truy cập.`;
+                    error = `Bệnh án "${folderName}" tồn tại nhưng không có nội dung hoặc bạn không có quyền truy cập.`;
                     directoryStructure = null;
                 }
             } else {
-                error = `Không tìm thấy folder "${folderName}" trong thư mục gốc. Vui lòng kiểm tra lại tên thư mục.`;
+                error = `Không tìm thấy folder "${folderName}" trong bệnh án gốc. Vui lòng kiểm tra lại tên bệnh án.`;
             }
         } catch (err) {
             console.error('Lỗi khi tìm kiếm folder:', err);
             
-            let errorMessage = 'Lỗi không xác định khi tìm kiếm thư mục.';
+            let errorMessage = 'Lỗi không xác định khi tìm kiếm bệnh án.';
             
             if (err.code === 'EACCES') {
-                errorMessage = 'Không có quyền truy cập vào thư mục này.';
+                errorMessage = 'Không có quyền truy cập vào bệnh án này.';
             } else if (err.code === 'ENOENT') {
-                errorMessage = 'Thư mục không tồn tại hoặc đã bị xóa.';
+                errorMessage = 'Bệnh án không tồn tại hoặc đã bị xóa.';
             } else if (err.code === 'EMFILE' || err.code === 'ENFILE') {
                 errorMessage = 'Hệ thống đang quá tải. Vui lòng thử lại sau.';
             }
@@ -204,7 +204,7 @@ function findFolderPath(baseDir, folderName) {
                         fs.accessSync(itemPath, fs.constants.R_OK);
                         return itemPath;
                     } catch (accessError) {
-                        console.log(`Không có quyền truy cập thư mục: ${itemPath}`);
+                        console.log(`Không có quyền truy cập bệnh án: ${itemPath}`);
                         return null;
                     }
                 }
@@ -226,7 +226,7 @@ function findFolderPath(baseDir, folderName) {
 
 // Route API để lấy thông tin thư mục dưới dạng JSON
 app.get('/api/directory', (req, res) => {
-    const baseDir = '/Users/DangLong/apps/mfiles/list-f';
+    const baseDir = '/./list-f';
     const folderName = req.query.folder ? req.query.folder.trim() : '';
     
     // Validation
@@ -241,7 +241,7 @@ app.get('/api/directory', (req, res) => {
     if (folderName.length > 50 || /[<>:"/\\|?*]/.test(folderName)) {
         return res.status(400).json({
             success: false,
-            error: 'Tên thư mục không hợp lệ',
+            error: 'Tên bệnh án không hợp lệ',
             code: 'INVALID_FOLDER_NAME'
         });
     }
@@ -265,7 +265,7 @@ app.get('/api/directory', (req, res) => {
                 success: true,
                 data: directoryStructure,
                 path: searchPath,
-                warning: 'Thư mục rỗng hoặc không có quyền truy cập nội dung'
+                warning: 'Bệnh án rỗng hoặc không có quyền truy cập nội dung'
             });
         }
         
@@ -278,11 +278,11 @@ app.get('/api/directory', (req, res) => {
         console.error('Lỗi API:', error);
         
         let errorCode = 'UNKNOWN_ERROR';
-        let errorMessage = 'Lỗi không xác định khi đọc thư mục';
+        let errorMessage = 'Lỗi không xác định khi đọc bệnh án';
         
         if (error.code === 'EACCES') {
             errorCode = 'ACCESS_DENIED';
-            errorMessage = 'Không có quyền truy cập vào thư mục';
+            errorMessage = 'Không có quyền truy cập vào bệnh án';
         } else if (error.code === 'ENOENT') {
             errorCode = 'PATH_NOT_FOUND';
             errorMessage = 'Đường dẫn không tồn tại';
@@ -303,7 +303,7 @@ app.get('/api/directory', (req, res) => {
 // Khởi động server
 app.listen(PORT, () => {
     console.log(`🚀 Server đang chạy tại http://localhost:${PORT}`);
-    console.log(`📁 Đang quản lý thư mục: /Users/DangLong/apps/mfiles/list-f`);
+    console.log(`📁 Đang quản lý bệnh án: ./list-f`);
 });
 
 module.exports = app;
