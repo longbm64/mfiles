@@ -151,10 +151,12 @@
 
         .tree-children.collapsed {
             max-height: 0;
+            opacity: 0;
         }
 
         .tree-children.expanded {
             max-height: 1000px;
+            opacity: 1;
         }
 
         /* Custom scrollbar */
@@ -354,11 +356,11 @@
                         <i class="bi bi-arrow-clockwise"></i>
                         Làm mới
                     </button>
-                    <button class="btn btn-outline-success" onclick="window.treeView?.expandAll()">
+                    <button class="btn btn-outline-success" onclick="window.TreeView?.expandAll()">
                         <i class="bi bi-plus-square"></i>
                         Mở rộng tất cả
                     </button>
-                    <button class="btn btn-outline-warning" onclick="window.treeView?.collapseAll()">
+                    <button class="btn btn-outline-warning" onclick="window.TreeView?.collapseAll()">
                         <i class="bi bi-dash-square"></i>
                         Thu gọn tất cả
                     </button>

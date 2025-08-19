@@ -2,7 +2,7 @@
     <div class="tree-node" data-level="<%= level %>">
         <!-- Node item -->
         <div class="tree-item d-flex align-items-center py-2 px-2 rounded" 
-             data-type="<%= node.type %>" 
+             data-type="<%= node.type === 'directory' ? 'folder' : 'file' %>" 
              data-size="<%= node.size || 0 %>">
             
             <% if (node.type === 'directory') { %>
@@ -49,7 +49,7 @@
         
         <!-- Children (for directories) -->
         <% if (node.type === 'directory' && node.children && node.children.length > 0) { %>
-            <div class="tree-children" style="display: none;">
+            <div class="tree-children collapsed">
                 <% node.children.forEach(function(child) { %>
                     <%- include('../partials/tree-node', { node: child, level: level + 1 }) %>
                 <% }); %>
