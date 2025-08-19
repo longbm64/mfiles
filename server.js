@@ -66,25 +66,7 @@ app.use('/assets', (req, res, next) => {
     next();
 });
 
-// Route fallback cho CSS nếu static middleware không hoạt động
-app.get('/assets/css/style.css', (req, res) => {
-    const cssPath = path.join(__dirname, 'public', 'assets', 'css', 'style.css');
-    
-    try {
-        if (fs.existsSync(cssPath)) {
-            const cssContent = fs.readFileSync(cssPath, 'utf8');
-            res.setHeader('Content-Type', 'text/css; charset=utf-8');
-            res.setHeader('Cache-Control', 'public, max-age=31536000');
-            res.setHeader('X-Content-Type-Options', 'nosniff');
-            res.send(cssContent);
-        } else {
-            res.status(404).send('/* CSS file not found */');
-        }
-    } catch (error) {
-        console.error('Error serving CSS:', error);
-        res.status(500).send('/* Error loading CSS */');
-    }
-});
+// Express.static middleware đã đủ để phục vụ CSS files
 
 // Route để phục vụ file PDF
 app.get('/file/*', (req, res) => {
