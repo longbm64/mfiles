@@ -17,32 +17,32 @@ app.get('/file/*', (req, res) => {
     const relativePath = req.params[0]; // Lấy đường dẫn tương đối từ URL
     const baseDir = '/./list-f';
     const fullPath = path.join(baseDir, relativePath);
-    
+
     try {
         // Kiểm tra file có tồn tại không
         if (!fs.existsSync(fullPath)) {
             return res.status(404).send('File không tồn tại');
         }
-        
+
         // Kiểm tra có phải file không (không phải bệnh án)
         const stats = fs.statSync(fullPath);
         if (!stats.isFile()) {
             return res.status(400).send('Đường dẫn không phải là file');
         }
-        
+
         // Kiểm tra extension file có hợp lệ không (chỉ cho phép PDF)
         const ext = path.extname(fullPath).toLowerCase();
         if (ext !== '.pdf') {
             return res.status(403).send('Chỉ được phép truy cập file PDF');
         }
-        
+
         // Đặt header cho PDF
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', `inline; filename="${path.basename(fullPath)}"`);
-        
+
         // Gửi file
         res.sendFile(fullPath);
-        
+
     } catch (error) {
         console.error('Lỗi khi phục vụ file:', error);
         res.status(500).send('Lỗi server khi đọc file');
@@ -58,36 +58,36 @@ app.get('/file/*', (req, res) => {
  */
 function scanDirectory(dirPath, depth = 0, baseDir = null) {
     const maxDepth = 10; // Giới hạn độ sâu để tránh infinite loop
-    
+
     if (depth > maxDepth) {
         return null;
     }
-    
+
     // Nếu baseDir chưa được set, sử dụng dirPath làm baseDir
     if (!baseDir) {
         baseDir = '/./list-f';
     }
-    
+
     try {
         const stats = fs.statSync(dirPath);
         const name = path.basename(dirPath);
-        
+
         if (stats.isDirectory()) {
             const children = [];
             const items = fs.readdirSync(dirPath);
-            
+
             // Sắp xếp: bệnh án trước, file sau
             items.sort((a, b) => {
                 const aPath = path.join(dirPath, a);
                 const bPath = path.join(dirPath, b);
                 const aIsDir = fs.statSync(aPath).isDirectory();
                 const bIsDir = fs.statSync(bPath).isDirectory();
-                
+
                 if (aIsDir && !bIsDir) return -1;
                 if (!aIsDir && bIsDir) return 1;
                 return a.localeCompare(b);
             });
-            
+
             items.forEach(item => {
                 const itemPath = path.join(dirPath, item);
                 const childNode = scanDirectory(itemPath, depth + 1, baseDir);
@@ -95,7 +95,7 @@ function scanDirectory(dirPath, depth = 0, baseDir = null) {
                     children.push(childNode);
                 }
             });
-            
+
             return {
                 name: name,
                 type: 'directory',
@@ -124,24 +124,24 @@ function scanDirectory(dirPath, depth = 0, baseDir = null) {
 app.get('/', (req, res) => {
     const baseDir = '/./list-f';
     const folderName = req.query.folder ? req.query.folder.trim() : '';
-    
+
     let directoryStructure = null;
     let error = null;
     let searchPath = null;
-    
+
     // Validation input
     if (folderName && (folderName.length > 50 || /[<>:"/\\|?*]/.test(folderName))) {
         error = 'Tên bệnh án không hợp lệ. Vui lòng không sử dụng ký tự đặc biệt và giới hạn dưới 50 ký tự.';
     }
-    
+
     // Nếu có tham số folder, tìm kiếm folder đó
     if (folderName && !error) {
         try {
             searchPath = findFolderPath(baseDir, folderName);
-            
+
             if (searchPath) {
                 directoryStructure = scanDirectory(searchPath);
-                
+
                 // Kiểm tra nếu bệnh án rỗng
                 if (!directoryStructure.children || directoryStructure.children.length === 0) {
                     error = `Bệnh án "${folderName}" tồn tại nhưng không có nội dung hoặc bạn không có quyền truy cập.`;
@@ -152,9 +152,9 @@ app.get('/', (req, res) => {
             }
         } catch (err) {
             console.error('Lỗi khi tìm kiếm folder:', err);
-            
+
             let errorMessage = 'Lỗi không xác định khi tìm kiếm bệnh án.';
-            
+
             if (err.code === 'EACCES') {
                 errorMessage = 'Không có quyền truy cập vào bệnh án này.';
             } else if (err.code === 'ENOENT') {
@@ -162,11 +162,11 @@ app.get('/', (req, res) => {
             } else if (err.code === 'EMFILE' || err.code === 'ENFILE') {
                 errorMessage = 'Hệ thống đang quá tải. Vui lòng thử lại sau.';
             }
-            
+
             error = errorMessage;
         }
     }
-    
+
     res.render('index', {
         title: 'QUẢN LÝ BỆNH ÁN',
         baseDir: baseDir,
@@ -189,13 +189,13 @@ function findFolderPath(baseDir, folderName) {
         if (!fs.existsSync(baseDir)) {
             return null;
         }
-        
+
         const items = fs.readdirSync(baseDir);
-        
+
         for (const item of items) {
             const itemPath = path.join(baseDir, item);
             const stats = fs.statSync(itemPath);
-            
+
             if (stats.isDirectory()) {
                 // Kiểm tra tên folder có khớp không (case-insensitive)
                 if (item.toLowerCase() === folderName.toLowerCase()) {
@@ -208,7 +208,7 @@ function findFolderPath(baseDir, folderName) {
                         return null;
                     }
                 }
-                
+
                 // Tìm kiếm đệ quy trong các thư mục con
                 const foundPath = findFolderPath(itemPath, folderName);
                 if (foundPath) {
@@ -216,7 +216,7 @@ function findFolderPath(baseDir, folderName) {
                 }
             }
         }
-        
+
         return null;
     } catch (error) {
         console.error(`Lỗi khi tìm kiếm trong ${baseDir}:`, error.message);
@@ -226,9 +226,9 @@ function findFolderPath(baseDir, folderName) {
 
 // Route API để lấy thông tin thư mục dưới dạng JSON
 app.get('/api/directory', (req, res) => {
-    const baseDir = '/./list-f';
+    const baseDir = './list-f';
     const folderName = req.query.folder ? req.query.folder.trim() : '';
-    
+
     // Validation
     if (!folderName) {
         return res.status(400).json({
@@ -237,7 +237,7 @@ app.get('/api/directory', (req, res) => {
             code: 'MISSING_FOLDER_PARAM'
         });
     }
-    
+
     if (folderName.length > 50 || /[<>:"/\\|?*]/.test(folderName)) {
         return res.status(400).json({
             success: false,
@@ -245,10 +245,10 @@ app.get('/api/directory', (req, res) => {
             code: 'INVALID_FOLDER_NAME'
         });
     }
-    
+
     try {
         const searchPath = findFolderPath(baseDir, folderName);
-        
+
         if (!searchPath) {
             return res.status(404).json({
                 success: false,
@@ -257,9 +257,9 @@ app.get('/api/directory', (req, res) => {
                 folderName: folderName
             });
         }
-        
+
         const directoryStructure = scanDirectory(searchPath);
-        
+
         if (!directoryStructure.children || directoryStructure.children.length === 0) {
             return res.status(200).json({
                 success: true,
@@ -268,7 +268,7 @@ app.get('/api/directory', (req, res) => {
                 warning: 'Bệnh án rỗng hoặc không có quyền truy cập nội dung'
             });
         }
-        
+
         res.json({
             success: true,
             data: directoryStructure,
@@ -276,10 +276,10 @@ app.get('/api/directory', (req, res) => {
         });
     } catch (error) {
         console.error('Lỗi API:', error);
-        
+
         let errorCode = 'UNKNOWN_ERROR';
         let errorMessage = 'Lỗi không xác định khi đọc bệnh án';
-        
+
         if (error.code === 'EACCES') {
             errorCode = 'ACCESS_DENIED';
             errorMessage = 'Không có quyền truy cập vào bệnh án';
@@ -290,7 +290,7 @@ app.get('/api/directory', (req, res) => {
             errorCode = 'SYSTEM_OVERLOAD';
             errorMessage = 'Hệ thống quá tải';
         }
-        
+
         res.status(500).json({
             success: false,
             error: errorMessage,
