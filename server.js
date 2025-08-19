@@ -12,17 +12,60 @@ app.set('views', path.join(__dirname, 'views'));
 // Cấu hình static files
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Route để phục vụ file PDF
+app.get('/file/*', (req, res) => {
+    const relativePath = req.params[0]; // Lấy đường dẫn tương đối từ URL
+    const baseDir = '/Users/DangLong/apps/mfiles/list-f';
+    const fullPath = path.join(baseDir, relativePath);
+    
+    try {
+        // Kiểm tra file có tồn tại không
+        if (!fs.existsSync(fullPath)) {
+            return res.status(404).send('File không tồn tại');
+        }
+        
+        // Kiểm tra có phải file không (không phải thư mục)
+        const stats = fs.statSync(fullPath);
+        if (!stats.isFile()) {
+            return res.status(400).send('Đường dẫn không phải là file');
+        }
+        
+        // Kiểm tra extension file có hợp lệ không (chỉ cho phép PDF)
+        const ext = path.extname(fullPath).toLowerCase();
+        if (ext !== '.pdf') {
+            return res.status(403).send('Chỉ được phép truy cập file PDF');
+        }
+        
+        // Đặt header cho PDF
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `inline; filename="${path.basename(fullPath)}"`);
+        
+        // Gửi file
+        res.sendFile(fullPath);
+        
+    } catch (error) {
+        console.error('Lỗi khi phục vụ file:', error);
+        res.status(500).send('Lỗi server khi đọc file');
+    }
+});
+
 /**
  * Hàm đệ quy để scan cấu trúc thư mục
  * @param {string} dirPath - Đường dẫn thư mục cần scan
  * @param {number} depth - Độ sâu hiện tại (để tránh scan quá sâu)
+ * @param {string} baseDir - Thư mục gốc để tính relative path
  * @returns {Object} Cấu trúc thư mục dưới dạng object
  */
-function scanDirectory(dirPath, depth = 0) {
+function scanDirectory(dirPath, depth = 0, baseDir = null) {
     const maxDepth = 10; // Giới hạn độ sâu để tránh infinite loop
     
     if (depth > maxDepth) {
         return null;
+    }
+    
+    // Nếu baseDir chưa được set, sử dụng dirPath làm baseDir
+    if (!baseDir) {
+        baseDir = '/Users/DangLong/apps/mfiles/list-f';
     }
     
     try {
@@ -47,7 +90,7 @@ function scanDirectory(dirPath, depth = 0) {
             
             items.forEach(item => {
                 const itemPath = path.join(dirPath, item);
-                const childNode = scanDirectory(itemPath, depth + 1);
+                const childNode = scanDirectory(itemPath, depth + 1, baseDir);
                 if (childNode) {
                     children.push(childNode);
                 }
@@ -57,6 +100,7 @@ function scanDirectory(dirPath, depth = 0) {
                 name: name,
                 type: 'directory',
                 path: dirPath,
+                relativePath: path.relative(baseDir, dirPath),
                 children: children,
                 size: children.length
             };
@@ -65,6 +109,7 @@ function scanDirectory(dirPath, depth = 0) {
                 name: name,
                 type: 'file',
                 path: dirPath,
+                relativePath: path.relative(baseDir, dirPath),
                 size: stats.size,
                 modified: stats.mtime
             };
@@ -123,7 +168,7 @@ app.get('/', (req, res) => {
     }
     
     res.render('index', {
-        title: 'Quản lý thư mục',
+        title: 'QUẢN LÝ BỆNH ÁN',
         baseDir: baseDir,
         folderName: folderName || '',
         searchPath: searchPath,

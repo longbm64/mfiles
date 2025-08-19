@@ -23,8 +23,21 @@
             <% } else { %>
                 <!-- File -->
                 <span class="me-2" style="width: 0.8rem;"></span>
-                <i class="bi bi-file-earmark file-icon me-2"></i>
-                <span><%= node.name %></span>
+                <% if (node.name.toLowerCase().endsWith('.pdf')) { %>
+                    <!-- PDF file với link -->
+                    <i class="bi bi-file-earmark-pdf text-danger me-2"></i>
+                    <a href="/file/<%= encodeURIComponent(node.relativePath) %>" 
+                       target="_blank" 
+                       class="text-decoration-none text-primary"
+                       title="Mở file PDF">
+                        <%= node.name %>
+                        <i class="bi bi-box-arrow-up-right ms-1 small"></i>
+                    </a>
+                <% } else { %>
+                    <!-- File thông thường -->
+                    <i class="bi bi-file-earmark file-icon me-2"></i>
+                    <span><%= node.name %></span>
+                <% } %>
                 
                 <% if (node.size) { %>
                     <span class="file-size ms-auto">
