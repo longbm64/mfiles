@@ -1,13 +1,16 @@
+// Load environment variables từ file .env
+require('dotenv').config();
+
 const express = require('express');
-const path = require('path');
 const fs = require('fs');
+const path = require('path');
 const mime = require('mime-types'); // Thêm mime-types để xử lý MIME type chính xác
 
 const app = express();
 const PORT = process.env.PORT || 9100;
 
-// Cấu hình đường dẫn bệnh án gốc - chỉ cần thay đổi ở đây
-const BASE_DIR = './list-f';
+// Cấu hình đường dẫn bệnh án gốc từ biến môi trường
+const BASE_DIR = process.env.BASE_DIR || './list-f';
 
 // Cấu hình EJS template engine
 app.set('view engine', 'ejs');
