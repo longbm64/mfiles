@@ -5,6 +5,9 @@ const fs = require('fs');
 const app = express();
 const PORT = process.env.PORT || 9100;
 
+// Cấu hình đường dẫn bệnh án gốc - chỉ cần thay đổi ở đây
+const BASE_DIR = './list-f';
+
 // Cấu hình EJS template engine
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
@@ -15,8 +18,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Route để phục vụ file PDF
 app.get('/file/*', (req, res) => {
     const relativePath = req.params[0]; // Lấy đường dẫn tương đối từ URL
-    const baseDir = '/./list-f';
-    const fullPath = path.join(baseDir, relativePath);
+    const fullPath = path.join(BASE_DIR, relativePath);
 
     try {
         // Kiểm tra file có tồn tại không
@@ -63,9 +65,9 @@ function scanDirectory(dirPath, depth = 0, baseDir = null) {
         return null;
     }
 
-    // Nếu baseDir chưa được set, sử dụng dirPath làm baseDir
+    // Nếu baseDir chưa được set, sử dụng BASE_DIR làm baseDir
     if (!baseDir) {
-        baseDir = '/./list-f';
+        baseDir = BASE_DIR;
     }
 
     try {
@@ -122,7 +124,6 @@ function scanDirectory(dirPath, depth = 0, baseDir = null) {
 
 // Route chính để hiển thị form tìm kiếm và kết quả
 app.get('/', (req, res) => {
-    const baseDir = '/./list-f';
     const folderName = req.query.folder ? req.query.folder.trim() : '';
 
     let directoryStructure = null;
@@ -137,7 +138,7 @@ app.get('/', (req, res) => {
     // Nếu có tham số folder, tìm kiếm folder đó
     if (folderName && !error) {
         try {
-            searchPath = findFolderPath(baseDir, folderName);
+            searchPath = findFolderPath(BASE_DIR, folderName);
 
             if (searchPath) {
                 directoryStructure = scanDirectory(searchPath);
@@ -169,7 +170,7 @@ app.get('/', (req, res) => {
 
     res.render('index', {
         title: 'QUẢN LÝ BỆNH ÁN',
-        baseDir: baseDir,
+        baseDir: BASE_DIR,
         folderName: folderName || '',
         searchPath: searchPath,
         structure: directoryStructure,
@@ -226,7 +227,6 @@ function findFolderPath(baseDir, folderName) {
 
 // Route API để lấy thông tin thư mục dưới dạng JSON
 app.get('/api/directory', (req, res) => {
-    const baseDir = './list-f';
     const folderName = req.query.folder ? req.query.folder.trim() : '';
 
     // Validation
@@ -247,7 +247,7 @@ app.get('/api/directory', (req, res) => {
     }
 
     try {
-        const searchPath = findFolderPath(baseDir, folderName);
+        const searchPath = findFolderPath(BASE_DIR, folderName);
 
         if (!searchPath) {
             return res.status(404).json({
@@ -303,7 +303,7 @@ app.get('/api/directory', (req, res) => {
 // Khởi động server
 app.listen(PORT, () => {
     console.log(`🚀 Server đang chạy tại http://localhost:${PORT}`);
-    console.log(`📁 Đang quản lý bệnh án: ./list-f`);
+    console.log(`📁 Đang quản lý bệnh án: ${BASE_DIR}`);
 });
 
 module.exports = app;
