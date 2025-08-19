@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
+const mime = require('mime-types'); // Thêm mime-types để xử lý MIME type chính xác
 
 const app = express();
 const PORT = process.env.PORT || 9100;
@@ -12,8 +13,75 @@ const BASE_DIR = './list-f';
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// Cấu hình static files
-app.use(express.static(path.join(__dirname, 'public')));
+// Cấu hình static files với MIME type chính xác
+app.use(express.static(path.join(__dirname, 'public'), {
+    setHeaders: (res, filePath) => {
+        // Sử dụng mime-types để đặt MIME type chính xác
+        const mimeType = mime.lookup(filePath);
+        if (mimeType) {
+            res.setHeader('Content-Type', mimeType);
+        }
+        
+        // Đặt MIME type cụ thể cho các file quan trọng
+        const ext = path.extname(filePath).toLowerCase();
+        switch (ext) {
+            case '.css':
+                res.setHeader('Content-Type', 'text/css; charset=utf-8');
+                break;
+            case '.js':
+                res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+                break;
+            case '.json':
+                res.setHeader('Content-Type', 'application/json; charset=utf-8');
+                break;
+        }
+        
+        // Đặt cache control cho static files
+        res.setHeader('Cache-Control', 'public, max-age=31536000'); // 1 năm
+        
+        // Thêm security headers
+        res.setHeader('X-Content-Type-Options', 'nosniff');
+    }
+}));
+
+// Middleware để đảm bảo MIME type chính xác cho assets
+app.use('/assets', (req, res, next) => {
+    const ext = path.extname(req.path).toLowerCase();
+    
+    // Force set MIME type cho các file quan trọng
+    switch (ext) {
+        case '.css':
+            res.setHeader('Content-Type', 'text/css; charset=utf-8');
+            res.setHeader('X-Content-Type-Options', 'nosniff');
+            break;
+        case '.js':
+            res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+            res.setHeader('X-Content-Type-Options', 'nosniff');
+            break;
+    }
+    
+    next();
+});
+
+// Route fallback cho CSS nếu static middleware không hoạt động
+app.get('/assets/css/style.css', (req, res) => {
+    const cssPath = path.join(__dirname, 'public', 'assets', 'css', 'style.css');
+    
+    try {
+        if (fs.existsSync(cssPath)) {
+            const cssContent = fs.readFileSync(cssPath, 'utf8');
+            res.setHeader('Content-Type', 'text/css; charset=utf-8');
+            res.setHeader('Cache-Control', 'public, max-age=31536000');
+            res.setHeader('X-Content-Type-Options', 'nosniff');
+            res.send(cssContent);
+        } else {
+            res.status(404).send('/* CSS file not found */');
+        }
+    } catch (error) {
+        console.error('Error serving CSS:', error);
+        res.status(500).send('/* Error loading CSS */');
+    }
+});
 
 // Route để phục vụ file PDF
 app.get('/file/*', (req, res) => {
